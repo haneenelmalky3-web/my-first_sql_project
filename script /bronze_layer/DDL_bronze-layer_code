@@ -1,0 +1,59 @@
+
+create or alter procedure  bronze.layer_loading as 
+begin 
+    begin try 
+		print '>> loading crm tables ';
+		truncate table bronze.crm_cust_info;
+		bulk insert  bronze.crm_cust_info
+		from 'C:\Users\ALWALEED\Downloads\crm\cust_info.csv'
+		with(
+			firstrow=2,
+			fieldterminator=','
+		);
+		truncate table bronze.crm_prd_info;
+		bulk insert  bronze.crm_prd_info
+		from 'C:\Users\ALWALEED\Downloads\crm\prd_info.csv'
+		with(
+			firstrow=2,
+			fieldterminator=','
+		);
+		truncate table bronze.crm_sales_detailes;
+		bulk insert  bronze.crm_sales_detailes
+		from 'C:\Users\ALWALEED\Downloads\crm\sales_details.csv'
+		with(
+			firstrow=2,
+			fieldterminator=','
+		);
+		print '>>crm_tables loading is completed ';
+		print'==================================';
+		---------------------------------
+		print('>> loading erp_tables ');
+		truncate table bronze.erp_CUST_AZ12;
+		bulk insert  bronze.erp_CUST_AZ12
+		from 'C:\Users\ALWALEED\Downloads\erp\CUST_AZ12.csv'
+		with(
+			firstrow=2,
+			fieldterminator=','
+		);
+		truncate table bronze.erp_LOC_A101;
+		bulk insert  bronze.erp_LOC_A101
+		from 'C:\Users\ALWALEED\Downloads\erp\LOC_A101.csv'
+		with(
+			firstrow=2,
+			fieldterminator=','
+		);
+		truncate table bronze.erp_PX_CAT_G1V2;
+		bulk insert  bronze.erp_PX_CAT_G1V2
+		from 'C:\Users\ALWALEED\Downloads\erp\PX_CAT_G1V2.csv'
+		with(
+			firstrow=2,
+			fieldterminator=','
+		);
+		print'>>erp_tables loading is completed'
+    end try 
+	begin catch 
+	    print ' there is an error occured during the loadging '
+		print ' the error is ' + error_message() + 'at row number ' + cast (error_number() as nvarchar) 
+	end catch
+end 
+end 
