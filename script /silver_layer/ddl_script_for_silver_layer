@@ -1,0 +1,155 @@
+
+
+create or alter procedure bronze.load_silver as 
+begin 
+     begin try 
+    ---inserting data for crm_cust_info after cleansing into the silver layer 
+    insert into silver.crm_cust_info(
+        cst_id,
+        cst_key,
+        cst_firstname,
+        cst_lastname,
+        cst_marital_status,
+        cst_gndr,
+        cst_create_date)
+    select  
+        cst_id,
+        cst_key,
+        ------------------------------------
+        trim(cst_firstname) cst_firstname ,
+        trim(cst_lastname)cst_lastname ,
+        -------------------------------------
+         case when lower(cst_marital_status)='m' then 'marid'
+              when lower(cst_marital_status)='s'then 'single'
+              else 'unknow '
+         end cst_marital_status,
+         case when lower(cst_gndr) ='m' then 'male'
+              when lower(cst_gndr)='f' then 'female'
+              else ' unknown'
+         end cst_gndr,
+         ------------------------------------
+        cst_create_date
+    from(
+        select * ,
+        ROW_NUMBER() over(partition by cst_id order by  cst_create_date desc ) ranking 
+        from bronze.crm_cust_info)t 
+        where ranking=1 --select the most recent data ;
+        ------------------------------------
+    
+    insert into silver.crm_prd_info(
+	    prd_id,
+	    prd_key,
+	    cat_id,
+	    prd_key2,
+	    prd_nm,
+	    prd_cost,
+	    prd_line,
+	    prd_start_dt,
+	    prd_end_dt1)
+
+
+    select 
+	    prd_id,
+	    prd_key,
+	    replace(SUBSTRING(prd_key,1,5),'-','_') as cat_id ,
+	    substring(prd_key,7,len(prd_key))as prd_key2,
+	    prd_nm,
+	    coalesce(prd_cost,0) prd_cost,
+	    prd_line,
+	    prd_start_dt,
+	    LEAD( prd_start_dt)over(partition by prd_key order by prd_start_dt  asc) prd_end_dt1
+    from bronze.crm_prd_info;
+    ---------------------------------------------
+
+    insert into silver.crm_sales_detailes (
+        sls_ord_num,
+        sls_prd_key,
+        sls_cust_id,
+        sls_order_dt,
+        sls_ship_dt,
+        sls_due_dt,
+        sls_sales,
+        sls_quantity,
+        sls_price
+     )
+
+    select 
+        sls_ord_num,
+        sls_prd_key,
+        sls_cust_id,
+        case when len(sls_order_dt)<8 or sls_order_dt=0 then null
+             else cast(cast(sls_order_dt as varchar)as date)
+        end sls_order_date,
+        case when len(sls_ship_dt)<8 or sls_ship_dt =0 then null
+             else cast(cast(sls_ship_dt as varchar)as date)
+        end sls_ship_dt,
+        case when len(sls_due_dt)<8 or sls_due_dt =0 then null
+             else cast(cast(sls_due_dt as varchar)as date)
+        end sls_due_dt,
+         case when sls_sales <=0 or sls_sales is null or
+                    sls_sales!= sls_quantity *abs( sls_price)
+                        then sls_quantity * sls_price
+                    else sls_sales
+         end as sls_sales,--recalculating the price if the original data is wrong 
+        sls_quantity,
+         case when sls_price<=0 or sls_price is null
+              then sls_sales/nullif(sls_quantity,0)
+              else sls_price 
+        end sls_price --derive a price if the original value is invallid
+    from bronze.crm_sales_detailes;
+    --===========================================================
+
+    insert into silver.erp_CUST_AZ12(
+        CID,
+        BDATE,
+        GEN
+    )
+
+    select 
+         case when CID  like 'NA%' then SUBSTRING(CID,4,len(CID))
+               else CID
+         end CID,
+         case when BDATE >getdate() then null
+              else bdate
+         end BDATE, --making sure that there is nothing wrong with the_bdate data
+        case when GEN =' ' then null
+             when GEN ='f' then 'female'
+             when GEN ='m' then 'male'
+             else GEN 
+        end GEN ---handeling unknown cases 
+    from bronze.[erp_CUST_AZ12];
+    ----------------------------------------------------
+
+    insert into silver.erp_PX_CAT_G1V2(
+        ID,
+        CAT,
+        SUBCAT,
+        MAINTENANCE
+    )
+    select
+        ID,
+         trim(CAT) as CAT,
+         trim (SUBCAT) as SUBCAT,
+        MAINTENANCE
+
+    from bronze.erp_PX_CAT_G1V2;
+    --------------------------------------------------
+
+    insert into silver.erp_LOC_A101(
+        CID,
+        CNTRY
+    )
+    select 
+         replace( CID,'-','')as CID,
+         case when lower(CNTRY )in ('de ','germany') then 'germany'
+              when lower(CNTRY )in ('usa','united states','us') then 'united states'
+              when CNTRY =' ' then null
+              else CNTRY
+        end CNTRY
+    from bronze.erp_LOC_A101
+    end try 
+    begin catch 
+         print 'there is an error occured '+  cast (error_message ()as varchar ) 
+         print ' error num is  ' + cast (error_number() as varchar)
+    end catch 
+end 
