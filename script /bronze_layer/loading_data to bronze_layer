@@ -1,0 +1,11 @@
+/*
+loading the raw_data to the bronze_layer 
+*/
+truncate table bronze.crm_automobile_dataset;-->>truncating the table incase of modifying any thing 
+
+bulk insert bronze.crm_automobile_dataset
+from 'C:\Users\ALWALEED\Downloads\crm\automobile_dataset.csv'
+with (
+	firstrow =2 ,
+	fieldterminator =','
+)
