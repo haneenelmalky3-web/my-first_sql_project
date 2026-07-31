@@ -1,14 +1,89 @@
+-==================================================
+-->>creating the diminsion_tables
+--==================================================
 
--- create Data Warehouse Database 
-use master ;
+if object_id('silver.manufacturing','u') is not null 
+drop table siver.silver.manufacturing ;
 GO
-create database datawarehouse;
+create table  silver.manufacturing (
+        manufacturing_key int primary key ,
+         make
+);
+----------------------------------------------------
+if object_id(' silver.body_type','u') is not null 
+drop table  silver.body_type;
 GO
---create bronze ,silver and gold schemas 
-use datawarehouse
-create schema bronze
+create table  silver.body_type(
+         body_type_id int primary key,
+         body_type nvarchar(50)
+);
+----------------------------------------------------
+if object_id(' silver.drivetrain','u') is not null 
+drop table silver.drivetrain
+create table  silver.drivetrain(
+         drivetrain_id int primary key,
+         drivetrain nvarchar(50)
+);
+---------------------------------------------------
+if object_id ('silver.service_history','u') is not null
+drop table silver.service_history;
 GO
-create schema silver ;
+create table  silver.service_history(
+         service_history_id int primary key,
+         service_history nvarchar(50)
+);
+--------------------------------------------------------
+if object_id('silver.color','u') is not null 
+drop table silver.color;
 GO
-create schema gold ;
+create table  silver.color (
+         color_id int primary key,
+         color nvarchar(50)
+);
+-------------------------------------------------------
+if object_id('silver.fuel_type','u') is not null
+drop table silver.fuel_type;
 GO
+create table  silver.fuel_type (
+         color_id int primary key,
+         color nvarchar(50)          
+);
+-=======================================================
+-->>creating the fact_table 
+-=======================================================
+
+if object_id('silver.car_information','u') is not null 
+drop table silver.car_information;
+GO
+create table silver.car_information(
+        car_id int  primary key ,
+        fuel_type_id  int  ,
+        transmission_id int ,
+        body_type_id int  ,
+        drivetrain_id int  ,
+        service_history_id  int ,
+        color_id  int ,
+        Model nvarchar(50),
+        Year float ,
+        Engine_Size float ,
+        Mileage float ,
+        Horsepower float ,
+        Torque float ,
+        Owners float,
+        Accident_History float ,
+        Fuel_Efficiency float ,
+        Location nvarchar(50),
+        Selling_Price float 
+)
+
+
+
+
+
+
+
+
+
+
+
+
