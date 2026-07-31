@@ -68,60 +68,60 @@ from bronze.crm_automobile_dataset)t
 ---------------------------------------------------------------
 insert into  silver.car_information (
 
-Manufacturing_ID ,
-Fuel_Type_ID ,
-Transmission_ID ,
-Body_Type_ID ,
-Drivetrain_ID ,
-Service_History_ID ,
-Color_ID ,
-
-Model,
-Year,
-Engine_Size,
-Mileage,
-Horsepower,
-Torque,
-Owners,
-Accident_History,
-Fuel_Efficiency,
-Location,
-Selling_Price)
---->> inserting the date 
-select 
-ma.manufacture_key,
-fu.fuel_type_id,
- tr.transmission_type_id,
- bo.body_type_id,
- dr.drivetrain_id,
- se.service_history_id,
- co.color_id,
-Model,
-Year,
-Engine_Size,
-Mileage,
-Horsepower,
-Torque,
-Owners,
-Accident_History,
-Fuel_Efficiency,
-Location,
-Selling_Price 
-from [bronze].[crm_automobile_dataset] au 
-left join  [silver].[manufacturing] ma 
-on ma.make=au.make
-left join [silver].[fuel_type] fu 
-on fu.fuel_type=au.Fuel_Type
-left join [silver].[transmission_type] tr 
-on tr.transmission=au.Transmission
-left join [silver].[body_type] bo 
-on bo.body_type=au.Body_Type
-left join [silver].[drivetrain] dr 
-on dr.drivetrain=au.Drivetrain
-left join [silver].[service_history] se 
-on se.service_history=au.Service_History
-left join [silver].[color] co 
-on co.color=au.Color
+       Manufacturing_ID ,
+       Fuel_Type_ID ,
+       Transmission_ID ,
+       Body_Type_ID ,
+       Drivetrain_ID ,
+       Service_History_ID ,
+       Color_ID ,
+       
+       Model,
+       Year,
+       Engine_Size,
+       Mileage,
+       Horsepower,
+       Torque,
+       Owners,
+       Accident_History,
+       Fuel_Efficiency,
+       Location,
+       Selling_Price)
+       --->> inserting the date 
+       select 
+       ma.manufacture_key,
+       fu.fuel_type_id,
+        tr.transmission_type_id,
+        bo.body_type_id,
+        dr.drivetrain_id,
+        se.service_history_id,
+        co.color_id,
+       Model,
+       Year,
+       Engine_Size,
+       Mileage,
+       Horsepower,
+       Torque,
+       Owners,
+       Accident_History,
+       Fuel_Efficiency,
+       Location,
+       Selling_Price 
+       from [bronze].[crm_automobile_dataset] au 
+       left join  [silver].[manufacturing] ma 
+       on ma.make=au.make
+       left join [silver].[fuel_type] fu 
+       on fu.fuel_type=au.Fuel_Type
+       left join [silver].[transmission_type] tr 
+       on tr.transmission=au.Transmission
+       left join [silver].[body_type] bo 
+       on bo.body_type=au.Body_Type
+       left join [silver].[drivetrain] dr 
+       on dr.drivetrain=au.Drivetrain
+       left join [silver].[service_history] se 
+       on se.service_history=au.Service_History
+       left join [silver].[color] co 
+       on co.color=au.Color )
 -------------------------------------------------------
 
 
